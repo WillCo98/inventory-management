@@ -1,6 +1,7 @@
 <template>
   <div class="orders">
     <div class="page-header">
+      <div class="section-code">§ 03 · ORDERS</div>
       <h2>{{ t('orders.title') }}</h2>
       <p>{{ t('orders.description') }}</p>
     </div>
@@ -11,25 +12,25 @@
       <div class="stats-grid">
         <div class="stat-card success">
           <div class="stat-label">{{ t('status.delivered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Delivered').length }}</div>
+          <div class="stat-value tabular">{{ getOrdersByStatus('Delivered').length }}</div>
         </div>
         <div class="stat-card info">
           <div class="stat-label">{{ t('status.shipped') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Shipped').length }}</div>
+          <div class="stat-value tabular">{{ getOrdersByStatus('Shipped').length }}</div>
         </div>
         <div class="stat-card warning">
           <div class="stat-label">{{ t('status.processing') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Processing').length }}</div>
+          <div class="stat-value tabular">{{ getOrdersByStatus('Processing').length }}</div>
         </div>
         <div class="stat-card danger">
           <div class="stat-label">{{ t('status.backordered') }}</div>
-          <div class="stat-value">{{ getOrdersByStatus('Backordered').length }}</div>
+          <div class="stat-value tabular">{{ getOrdersByStatus('Backordered').length }}</div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
+          <h3 class="card-title">{{ t('orders.allOrders') }} (<span class="tabular">{{ orders.length }}</span>)</h3>
         </div>
         <div class="table-container">
           <table class="orders-table">
@@ -46,7 +47,7 @@
             </thead>
             <tbody>
               <tr v-for="order in orders" :key="order.id">
-                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
+                <td class="col-order-number"><strong class="mono">{{ order.order_number }}</strong></td>
                 <td class="col-customer">{{ translateCustomerName(order.customer) }}</td>
                 <td class="col-items">
                   <details class="items-details">
@@ -54,9 +55,9 @@
                       {{ t('orders.itemsCount', { count: order.items.length }) }}
                     </summary>
                     <div class="items-dropdown">
-                      <div v-for="(item, idx) in order.items" :key="idx" class="item-entry">
+                      <div v-for="item in order.items" :key="item.name" class="item-entry">
                         <span class="item-name">{{ translateProductName(item.name) }}</span>
-                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ currencySymbol }}{{ item.unit_price }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: <span class="tabular">{{ item.quantity }}</span> @ <span class="tabular">{{ currencySymbol }}{{ item.unit_price }}</span></span>
                       </div>
                     </div>
                   </details>
@@ -66,9 +67,52 @@
                     {{ t(`status.${order.status.toLowerCase()}`) }}
                   </span>
                 </td>
-                <td class="col-date">{{ formatDate(order.order_date) }}</td>
-                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
-                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</strong></td>
+                <td class="col-date tabular">{{ formatDate(order.order_date) }}</td>
+                <td class="col-date tabular">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-value"><strong class="tabular">{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Submitted Restocking Orders -->
+      <div v-if="restockOrders.length > 0" class="card restock-card">
+        <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} (<span class="tabular">{{ restockOrders.length }}</span>)</h3>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ t('orders.table.orderNumber') }}</th>
+                <th>{{ t('orders.table.date') }}</th>
+                <th>{{ t('orders.table.items') }}</th>
+                <th>{{ t('orders.table.totalValue') }}</th>
+                <th>{{ t('orders.table.expectedDelivery') }}</th>
+                <th>{{ t('orders.table.status') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in restockOrders" :key="order.id">
+                <td><strong class="mono">{{ order.order_number }}</strong></td>
+                <td class="tabular">{{ formatDate(order.order_date) }}</td>
+                <td>
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="item in order.items" :key="item.name" class="item-entry">
+                        <span class="item-name">{{ translateProductName(item.name) }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: <span class="tabular">{{ item.quantity }}</span></span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td class="tabular">{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</td>
+                <td class="tabular">{{ formatDate(order.expected_delivery) }}</td>
+                <td><span :class="['badge', getOrderStatusClass(order.status)]">{{ t('status.submitted') }}</span></td>
               </tr>
             </tbody>
           </table>
@@ -95,6 +139,7 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const restockOrders = ref([])
 
     // Use shared filters
     const {
@@ -109,7 +154,10 @@ export default {
       try {
         loading.value = true
         const filters = getCurrentFilters()
-        const fetchedOrders = await api.getOrders(filters)
+        const [fetchedOrders, fetchedRestockOrders] = await Promise.all([
+          api.getOrders(filters),
+          api.getRestockOrders()
+        ])
 
         // Sort orders by order_date (earliest first)
         orders.value = fetchedOrders.sort((a, b) => {
@@ -117,6 +165,8 @@ export default {
           const dateB = new Date(b.order_date)
           return dateA - dateB
         })
+
+        restockOrders.value = fetchedRestockOrders
       } catch (err) {
         error.value = 'Failed to load orders: ' + err.message
       } finally {
@@ -138,7 +188,8 @@ export default {
         'Delivered': 'success',
         'Shipped': 'info',
         'Processing': 'warning',
-        'Backordered': 'danger'
+        'Backordered': 'danger',
+        'Submitted': 'info'
       }
       return statusMap[status] || 'info'
     }
@@ -160,6 +211,7 @@ export default {
       loading,
       error,
       orders,
+      restockOrders,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
@@ -172,6 +224,21 @@ export default {
 </script>
 
 <style scoped>
+/* Section-code eyebrow */
+.section-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--ink-muted);
+  margin-bottom: var(--space-2);
+}
+
+/* Restock card top margin — replaces the inline style="margin-top: 1.5rem" */
+.restock-card {
+  margin-top: var(--space-6);
+}
+
 /* Fixed table layout to prevent column shifting */
 .orders-table {
   table-layout: fixed;
@@ -179,63 +246,55 @@ export default {
 }
 
 /* Column widths */
-.col-order-number {
-  width: 130px;
-}
+.col-order-number { width: 130px; }
+.col-customer     { width: 180px; }
+.col-items        { width: 200px; }
+.col-status       { width: 130px; }
+.col-date         { width: 140px; }
+.col-value        { width: 120px; }
 
-.col-customer {
-  width: 180px;
-}
-
-.col-items {
-  width: 200px;
-}
-
-.col-status {
-  width: 130px;
-}
-
-.col-date {
-  width: 140px;
-}
-
-.col-value {
-  width: 120px;
-}
-
-/* Items details styling */
+/* Items details — expand/collapse */
 .items-details {
   position: relative;
 }
 
 .items-summary {
   cursor: pointer;
-  color: #3b82f6;
-  font-weight: 500;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   list-style: none;
   user-select: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: color var(--dur-fast) var(--ease-standard);
 }
 
 .items-summary::-webkit-details-marker {
   display: none;
 }
 
+/* Chevron using unicode — mono, muted default, accent when open */
 .items-summary::before {
-  content: '▶';
+  content: '▸';
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
   display: inline-block;
-  margin-right: 0.375rem;
-  font-size: 0.75rem;
-  transition: transform 0.2s;
+  transition: transform var(--dur-fast) var(--ease-standard),
+              color var(--dur-fast) var(--ease-standard);
+  line-height: 1;
 }
 
 .items-details[open] .items-summary::before {
-  transform: rotate(90deg);
+  content: '▾';
+  color: var(--accent);
 }
 
 .items-summary:hover {
-  color: #2563eb;
-  text-decoration: underline;
+  color: var(--accent-hover);
 }
 
 /* Dropdown container */
@@ -243,12 +302,12 @@ export default {
   position: absolute;
   top: 100%;
   left: 0;
-  margin-top: 0.5rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 0.75rem;
+  margin-top: var(--space-2);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-3);
   z-index: 10;
   min-width: 300px;
   max-width: 400px;
@@ -257,9 +316,9 @@ export default {
 .item-entry {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2);
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .item-entry:last-child {
@@ -267,13 +326,14 @@ export default {
 }
 
 .item-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #0f172a;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--ink);
 }
 
 .item-meta {
-  font-size: 0.813rem;
-  color: #64748b;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
 }
 </style>

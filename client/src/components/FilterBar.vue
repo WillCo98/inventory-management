@@ -1,6 +1,8 @@
 <template>
   <div class="filters-bar">
     <div class="filters-container">
+      <span class="parameters-label" aria-hidden="true">PARAMETERS</span>
+      <div class="parameters-divider" aria-hidden="true"></div>
       <div class="filters-grid">
         <div class="filter-group">
           <label>{{ t('filters.timePeriod') }}</label>
@@ -102,84 +104,134 @@ export default {
 
 <style scoped>
 .filters-bar {
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 0.75rem 0;
+  background: var(--paper-raised);
+  border-bottom: 1px solid var(--rule-subtle);
   position: sticky;
-  top: 70px;
+  top: var(--topbar-h);
   z-index: 90;
+  height: var(--filterbar-h);
+}
+
+@media (max-width: 1023px) {
+  .filters-bar {
+    height: auto;
+    padding: var(--space-3) var(--space-4);
+  }
 }
 
 .filters-container {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  height: 100%;
+  padding: 0 var(--space-6);
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-3);
+}
+
+.parameters-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--ink-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.parameters-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--rule-soft);
+  flex-shrink: 0;
 }
 
 .filters-grid {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-3);
   flex: 1;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+@media (max-width: 1279px) {
+  .parameters-label,
+  .parameters-divider {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .filters-grid {
+    flex-wrap: wrap;
+  }
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-1);
+  flex-shrink: 0;
 }
 
 .filter-group label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--ink-muted);
   white-space: nowrap;
 }
 
 .filter-select {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.813rem;
-  color: #0f172a;
-  background: white;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+  background: var(--paper-bg);
   cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 500;
-  min-width: 140px;
+  transition: border-color var(--dur-fast) var(--ease-standard);
+  width: auto;
+  min-width: 96px;
 }
 
 .filter-select:hover {
-  border-color: #94a3b8;
+  border-color: var(--ink);
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: var(--ring);
 }
 
 .reset-filters-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.4rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  color: #64748b;
+  width: 36px;
+  height: 36px;
+  background: var(--paper-bg);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background var(--dur-fast) var(--ease-standard),
+              border-color var(--dur-fast) var(--ease-standard),
+              color var(--dur-fast) var(--ease-standard);
   flex-shrink: 0;
 }
 
 .reset-filters-btn:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-hover);
+}
+
+.reset-filters-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
 }
 
 .reset-filters-btn:disabled {

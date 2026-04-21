@@ -1,6 +1,7 @@
 <template>
   <div class="spending">
     <div class="page-header">
+      <div class="section-code">§ 05 · FINANCE</div>
       <h2>{{ t('finance.title') }}</h2>
       <p>{{ t('finance.description') }}</p>
     </div>
@@ -10,9 +11,9 @@
     <div v-else>
       <!-- Revenue & Financial KPIs -->
       <div class="stats-grid-finance">
-        <div class="stat-card revenue-card">
+        <div class="stat-card revenue-card primary-kpi">
           <div class="stat-label">{{ t('finance.totalRevenue') }}</div>
-          <div class="stat-value">{{ formatCurrency(revenueMetrics.totalRevenue) }}</div>
+          <div class="stat-value tabular">{{ formatCurrency(revenueMetrics.totalRevenue) }}</div>
           <div class="stat-change positive">
             <span class="change-icon">↑</span>
             {{ t('finance.fromOrders', { count: revenueMetrics.orderCount }) }}
@@ -20,17 +21,17 @@
         </div>
         <div class="stat-card cost-card">
           <div class="stat-label">{{ t('finance.totalCosts') }}</div>
-          <div class="stat-value">{{ formatCurrency(totalCosts) }}</div>
+          <div class="stat-value tabular">{{ formatCurrency(totalCosts) }}</div>
           <div class="stat-meta">{{ t('finance.costBreakdown') }}</div>
         </div>
         <div class="stat-card profit-card">
           <div class="stat-label">{{ t('finance.netProfit') }}</div>
-          <div class="stat-value">{{ formatCurrency(netProfit) }}</div>
-          <div class="stat-meta">{{ profitMargin }}% {{ t('finance.margin') }}</div>
+          <div class="stat-value tabular">{{ formatCurrency(netProfit) }}</div>
+          <div class="stat-meta"><span class="tabular">{{ profitMargin }}%</span> {{ t('finance.margin') }}</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">{{ t('finance.avgOrderValue') }}</div>
-          <div class="stat-value">{{ formatCurrency(revenueMetrics.avgOrderValue) }}</div>
+          <div class="stat-value tabular">{{ formatCurrency(revenueMetrics.avgOrderValue) }}</div>
           <div class="stat-meta">{{ t('finance.perOrderRevenue') }}</div>
         </div>
       </div>
@@ -40,8 +41,8 @@
         <div class="card-header">
           <h3 class="card-title">{{ t('finance.revenueVsCosts.title') }}</h3>
           <div class="chart-legend">
-            <span class="legend-item"><span class="legend-dot revenue-color"></span>{{ t('finance.revenueVsCosts.revenue') }}</span>
-            <span class="legend-item"><span class="legend-dot cost-color"></span>{{ t('finance.revenueVsCosts.costs') }}</span>
+            <span class="legend-item"><span class="legend-swatch revenue-color"></span>{{ t('finance.revenueVsCosts.revenue') }}</span>
+            <span class="legend-item"><span class="legend-swatch cost-color"></span>{{ t('finance.revenueVsCosts.costs') }}</span>
           </div>
         </div>
         <div class="chart-container">
@@ -71,10 +72,10 @@
         <div class="card-header">
           <h3 class="card-title">{{ t('finance.monthlyCostFlow.title') }}</h3>
           <div class="chart-legend">
-            <span class="legend-item"><span class="legend-dot procurement"></span>{{ t('finance.monthlyCostFlow.procurement') }}</span>
-            <span class="legend-item"><span class="legend-dot operational"></span>{{ t('finance.monthlyCostFlow.operational') }}</span>
-            <span class="legend-item"><span class="legend-dot labor"></span>{{ t('finance.monthlyCostFlow.labor') }}</span>
-            <span class="legend-item"><span class="legend-dot overhead"></span>{{ t('finance.monthlyCostFlow.overhead') }}</span>
+            <span class="legend-item"><span class="legend-swatch procurement"></span>{{ t('finance.monthlyCostFlow.procurement') }}</span>
+            <span class="legend-item"><span class="legend-swatch operational"></span>{{ t('finance.monthlyCostFlow.operational') }}</span>
+            <span class="legend-item"><span class="legend-swatch labor"></span>{{ t('finance.monthlyCostFlow.labor') }}</span>
+            <span class="legend-item"><span class="legend-swatch overhead"></span>{{ t('finance.monthlyCostFlow.overhead') }}</span>
           </div>
         </div>
         <div class="chart-container">
@@ -112,14 +113,14 @@
             <div v-for="category in categorySpending" :key="category.category" class="category-item">
               <div class="category-info">
                 <div class="category-name">{{ translateCategory(category.category) }}</div>
-                <div class="category-amount">{{ currencySymbol }}{{ category.amount.toLocaleString() }}</div>
+                <div class="category-amount tabular">{{ currencySymbol }}{{ category.amount.toLocaleString() }}</div>
               </div>
               <div class="category-bar-container">
                 <div class="category-bar" :style="{ width: category.percentage + '%' }"></div>
               </div>
               <div class="category-meta">
-                <span class="percentage">{{ category.percentage }}% {{ t('finance.categorySpending.ofTotal') }}</span>
-                <span class="change" :class="{ positive: category.change > 0, negative: category.change < 0 }">
+                <span class="percentage tabular">{{ category.percentage }}% {{ t('finance.categorySpending.ofTotal') }}</span>
+                <span class="change tabular" :class="{ positive: category.change > 0, negative: category.change < 0 }">
                   {{ category.change > 0 ? '+' : '' }}{{ category.change }}%
                 </span>
               </div>
@@ -150,11 +151,11 @@
                   class="clickable-row"
                   @click="handleTransactionClick(transaction)"
                 >
-                  <td class="transaction-id">{{ transaction.id.toString().padStart(3, '0') }}</td>
+                  <td class="transaction-id mono">{{ transaction.id.toString().padStart(3, '0') }}</td>
                   <td class="transaction-description">{{ transaction.description }}</td>
                   <td class="transaction-vendor">{{ transaction.vendor }}</td>
-                  <td class="transaction-date">{{ formatDateShort(transaction.date) }}</td>
-                  <td class="transaction-amount text-right">{{ currencySymbol }}{{ transaction.amount.toLocaleString() }}</td>
+                  <td class="transaction-date mono tabular">{{ formatDateShort(transaction.date) }}</td>
+                  <td class="transaction-amount text-right tabular">{{ currencySymbol }}{{ transaction.amount.toLocaleString() }}</td>
                 </tr>
               </tbody>
             </table>
@@ -492,82 +493,123 @@ export default {
 </script>
 
 <style scoped>
+/* ── Section code eyebrow ─────────────────────────────────────── */
+.section-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--ink-muted);
+  margin-bottom: var(--space-2);
+}
+
+/* ── Stats grid ───────────────────────────────────────────────── */
+.stats-grid-finance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+/* Primary KPI gets accent top strip */
+.primary-kpi::before {
+  background: var(--accent) !important;
+}
+
+/* Semantic top strips for cost/profit cards */
+.cost-card::before   { background: var(--danger) !important; }
+.profit-card::before { background: var(--success) !important; }
+
+.stat-meta {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
 .stat-change {
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
-.stat-change.positive {
-  color: #059669;
-}
-
-.stat-change.negative {
-  color: #dc2626;
-}
+.stat-change.positive { color: var(--success); }
+.stat-change.negative { color: var(--danger); }
 
 .change-icon {
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: var(--weight-bold);
 }
 
-.chart-card {
-  margin-bottom: 1.75rem;
-}
-
+/* ── Chart cards ──────────────────────────────────────────────── */
 .chart-legend {
   display: flex;
-  gap: 1.5rem;
-  font-size: 0.875rem;
+  gap: var(--space-6);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #64748b;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--ink-soft);
 }
 
-.legend-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+/* 10×10 colored swatch with 1px rule border */
+.legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--rule);
+  flex-shrink: 0;
 }
 
-.legend-dot.procurement { background: #3b82f6; }
-.legend-dot.operational { background: #8b5cf6; }
-.legend-dot.labor { background: #10b981; }
-.legend-dot.overhead { background: #f59e0b; }
-.legend-dot.revenue-color { background: #0f172a; }
-.legend-dot.cost-color { background: #ef4444; }
+/* Revenue vs Costs series colors */
+.legend-swatch.revenue-color { background: var(--ink); }
+.legend-swatch.cost-color    { background: var(--danger); }
 
-.stats-grid-finance {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+/* Cost flow stacked series — semantic palette */
+.legend-swatch.procurement { background: var(--accent); }
+.legend-swatch.operational { background: var(--info); }
+.legend-swatch.labor       { background: var(--success); }
+.legend-swatch.overhead    { background: var(--warn); }
+
+.chart-container {
+  padding: var(--space-5) 0;
 }
 
-.revenue-card {
-  border-left: 4px solid #0f172a;
+.bar-chart {
+  display: flex;
+  gap: var(--space-6);
+  height: 350px;
 }
 
-.cost-card {
-  border-left: 4px solid #ef4444;
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  border-right: 1px solid var(--rule-subtle);
 }
 
-.profit-card {
-  border-left: 4px solid #3b82f6;
+.chart-area {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: var(--space-2);
 }
 
-.stat-meta {
-  margin-top: 0.5rem;
-  font-size: 0.813rem;
-  color: #64748b;
-}
-
+/* Revenue vs Costs bar groups */
 .bar-group-revenue {
   display: flex;
   flex-direction: column;
@@ -580,63 +622,40 @@ export default {
   width: 100%;
   max-width: 80px;
   display: flex;
-  gap: 6px;
+  gap: var(--space-1);
   justify-content: center;
   align-items: flex-end;
   height: 100%;
-  padding-bottom: 2rem;
+  padding-bottom: var(--space-8);
 }
 
-.revenue-bar, .cost-bar {
+.revenue-bar,
+.cost-bar {
   width: 50%;
   max-width: 30px;
-  border-radius: 6px 6px 0 0;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-none);
+  transition: opacity var(--dur-fast) var(--ease-standard);
   cursor: pointer;
   min-height: 4px;
+  border: 1px solid var(--rule);
 }
 
 .revenue-bar {
-  background: #0f172a;
+  background: var(--ink);
+  border-color: var(--rule);
 }
 
 .cost-bar {
-  background: #ef4444;
+  background: var(--danger);
+  border-color: var(--danger);
 }
 
-.revenue-bar:hover, .cost-bar:hover {
-  opacity: 0.8;
-  transform: scaleY(1.05);
+.revenue-bar:hover,
+.cost-bar:hover {
+  opacity: 0.75;
 }
 
-.chart-container {
-  padding: 1.5rem 0;
-}
-
-.bar-chart {
-  display: flex;
-  gap: 1.5rem;
-  height: 350px;
-}
-
-.y-axis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding-right: 1rem;
-  font-size: 0.75rem;
-  color: #94a3b8;
-  border-right: 1px solid #e2e8f0;
-}
-
-.chart-area {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  gap: 0.5rem;
-}
-
+/* Cost flow stacked bar groups */
 .bar-group {
   display: flex;
   flex-direction: column;
@@ -652,62 +671,51 @@ export default {
   flex-direction: column-reverse;
   align-items: stretch;
   height: 100%;
-  padding-bottom: 2rem;
+  padding-bottom: var(--space-8);
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--dur-fast) var(--ease-standard);
 }
 
 .stacked-bar:hover {
-  opacity: 0.85;
+  opacity: 0.8;
 }
 
 .bar-segment {
   width: 100%;
-  transition: all 0.3s ease;
-  cursor: pointer;
   display: block;
+  border-radius: var(--radius-none);
 }
 
-.bar-segment:first-child {
-  border-radius: 0 0 6px 6px;
-}
-
-.bar-segment:last-child {
-  border-radius: 6px 6px 0 0;
-}
-
-.bar-segment.procurement { background: #3b82f6; }
-.bar-segment.operational { background: #8b5cf6; }
-.bar-segment.labor { background: #10b981; }
-.bar-segment.overhead { background: #f59e0b; }
-
-.bar-segment:hover {
-  opacity: 0.8;
-}
+.bar-segment.procurement { background: var(--accent); }
+.bar-segment.operational { background: var(--info); }
+.bar-segment.labor       { background: var(--success); }
+.bar-segment.overhead    { background: var(--warn); }
 
 .bar-label {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
 }
 
+/* ── Two-column layout ───────────────────────────────────────── */
 .two-column-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 1.75rem;
+  gap: var(--space-5);
 }
 
+/* ── Category spending ───────────────────────────────────────── */
 .category-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-5);
 }
 
 .category-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .category-info {
@@ -717,53 +725,55 @@ export default {
 }
 
 .category-name {
-  font-weight: 600;
-  color: #0f172a;
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  font-size: var(--text-sm);
 }
 
 .category-amount {
-  font-weight: 700;
-  color: #2563eb;
-  font-size: 1.125rem;
+  font-family: var(--font-mono);
+  font-weight: var(--weight-semibold);
+  color: var(--accent);
+  font-size: var(--text-md);
 }
 
+/* Progress-bar track — rectangular, sunken */
 .category-bar-container {
   width: 100%;
-  height: 8px;
-  background: #f1f5f9;
-  border-radius: 4px;
+  height: 6px;
+  background: var(--paper-bg-sub);
+  border: 1px solid var(--rule-subtle);
+  border-radius: var(--radius-none);
   overflow: hidden;
 }
 
 .category-bar {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 4px;
-  transition: width 0.6s ease;
+  background: var(--accent);
+  border-radius: var(--radius-none);
+  transition: width var(--dur-slow) var(--ease-standard);
 }
 
 .category-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 0.813rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
 }
 
 .percentage {
-  color: #64748b;
+  color: var(--ink-muted);
 }
 
 .change {
-  font-weight: 600;
+  font-weight: var(--weight-semibold);
 }
 
-.change.positive {
-  color: #059669;
-}
+.change.positive { color: var(--success); }
+.change.negative { color: var(--danger); }
 
-.change.negative {
-  color: #dc2626;
-}
-
+/* ── Transactions table ──────────────────────────────────────── */
 .transactions-card {
   display: flex;
   flex-direction: column;
@@ -774,76 +784,42 @@ export default {
   max-height: 400px;
 }
 
-.transactions-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
+/* thead uses global styles; sticky override */
 .transactions-table thead {
   position: sticky;
   top: 0;
-  background: #f8fafc;
+  background: var(--paper-bg-sub);
   z-index: 1;
 }
 
-.transactions-table th {
-  text-align: left;
-  padding: 0.625rem 0.75rem;
-  font-weight: 600;
-  color: #475569;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.transactions-table th.text-right {
-  text-align: right;
-}
-
-.transactions-table td {
-  padding: 0.75rem 0.75rem;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 0.875rem;
-}
+.transactions-table th.text-right { text-align: right; }
 
 .transactions-table tbody tr {
   cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.transactions-table tbody tr:hover {
-  background: #f8fafc;
-}
-
-.transactions-table tbody tr.clickable-row:hover {
-  background: #eff6ff;
 }
 
 .transaction-id {
-  color: #64748b;
-  font-weight: 500;
-  font-family: 'Monaco', 'Courier New', monospace;
-  font-size: 0.813rem;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
 }
 
 .transaction-description {
-  color: #0f172a;
-  font-weight: 500;
+  color: var(--ink);
+  font-weight: var(--weight-medium);
 }
 
 .transaction-vendor {
-  color: #64748b;
+  color: var(--ink-muted);
 }
 
 .transaction-date {
-  color: #64748b;
-  font-size: 0.813rem;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
 }
 
 .transaction-amount {
-  font-weight: 700;
-  color: #0f172a;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
 }
 
 .text-right {
